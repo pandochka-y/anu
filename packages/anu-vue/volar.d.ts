@@ -9,6 +9,7 @@ declare module 'vue' {
     ACheckbox: typeof import('anu-vue')['ACheckbox']
     AChip: typeof import('anu-vue')['AChip']
     ADataTable: typeof import('anu-vue')['ADataTable']
+    ADatePicker: typeof import('anu-vue')['ADatePicker']
     ADialog: typeof import('anu-vue')['ADialog']
     ADrawer: typeof import('anu-vue')['ADrawer']
     AFloating: typeof import('anu-vue')['AFloating']

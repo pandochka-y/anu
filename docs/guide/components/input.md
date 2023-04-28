@@ -15,6 +15,18 @@ You can use `AInput` component to render basic input.
 
 ::::
 
+
+<!-- 👉 Basic -->
+::::card Added placeholder props
+
+:::code DemoInputBasicPlaceholder
+<<< @/components/demos/input/DemoInputBasicPlaceholder.vue{4}
+
+:::
+
+::::
+
+
 <!-- 👉 Placeholder -->
 ::::card Placeholder
 

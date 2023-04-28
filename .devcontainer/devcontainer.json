@@ -1,0 +1,68 @@
+{
+  "name": "Nuxt",
+  "forwardPorts": [
+    3000
+  ],
+  "onCreateCommand": "pnpm install",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true,
+      "username": "automatic",
+      "userUid": "automatic",
+      "userGid": "automatic"
+    },
+    "ghcr.io/devcontainers/features/node:1": {
+      "nodeGypDependencies": true,
+      "version": "latest"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "vscode.typescript-language-features": false
+      },
+      "extensions": [
+        "aaron-bond.better-comments",
+        "alefragnani.bookmarks",
+        "antfu.auto-npx",
+        "antfu.goto-alias",
+        "antfu.iconify",
+        "antfu.unocss",
+        "antfu.vite",
+        "antfu.where-am-i",
+        "arcanis.vscode-zipfs",
+        "christian-kohler.npm-intellisense",
+        "cpylua.language-postcss",
+        "davidanson.vscode-markdownlint",
+        "dbaeumer.vscode-eslint",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig",
+        "esbenp.prettier-vscode",
+        "exodiusstudios.comment-anchors",
+        "foxundermoon.shell-format",
+        "howardzuo.vscode-npm-dependency",
+        "johnsoncodehk.vscode-tsconfig-helper",
+        "lokalise.i18n-ally",
+        "matijao.vue-nuxt-snippets",
+        "mgmcdermott.vscode-language-babel",
+        "mikestead.dotenv",
+        "ms-vscode.vscode-js-profile-flame",
+        "oderwat.indent-rainbow",
+        "streetsidesoftware.code-spell-checker",
+        "stylelint.vscode-stylelint",
+        "tombonnike.vscode-status-bar-format-toggle",
+        "usernamehw.errorlens",
+        "VisualStudioExptTeam.vscodeintellicode",
+        "vue.volar",
+        "vue.volar",
+        "webhint.vscode-webhint",
+        "xabikos.javascriptsnippets",
+        "yzhang.markdown-all-in-one"
+      ]
+    }
+  }
+}

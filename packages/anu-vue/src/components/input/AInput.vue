@@ -26,6 +26,10 @@ const isInputTypeFile = attrs.type && attrs.type === 'file'
 function handleInputWrapperClick() {
   input.value?.focus()
 }
+
+defineExpose({
+  input,
+})
 </script>
 
 <template>

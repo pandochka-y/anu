@@ -30,6 +30,7 @@ const elementId = _elementIdToken ? `a-input-${_elementIdToken}-${Math.random().
 const refRoot = ref()
 const refInputContainer = ref()
 const refInputWrapper = ref()
+console.log('element', elementId)
 
 defineExpose({
   refRoot,
@@ -95,7 +96,7 @@ defineExpose({
         <!-- 👉 Slot: Default -->
         <!-- TODO: We need to improve default slot implementation so that we can provide selected slot to selection component -->
         <slot
-          :id="elementId"
+          :id="`${elementId}`"
           :readonly="props.readonly"
           :disabled="props.disabled"
           class="a-base-input-child w-full h-full inset-0 rounded-inherit bg-transparent"

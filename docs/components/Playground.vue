@@ -15,8 +15,16 @@ const colors = [
       class="m-8"
     >
       <div class="a-card-body flex items-center gap-4">
-        <ABtn class="focus:ring-4 transition-shadow transition-ease-both ring-offset-0 ring-[hsla(var(--a-layer-c),.35)]" v-for="color in colors" :key="color" :color="color">{{ color }}</ABtn>
-        <AIcon icon="i-bx-home"></AIcon>
+        <!-- <ABtn
+          v-for="color in colors"
+          :key="color"
+          class="focus:ring-4 transition-shadow transition-ease-both ring-offset-0 ring-[hsla(var(--a-layer-c),.35)]"
+          :color="color"
+        >
+          {{ color }}
+        </ABtn> -->
+        <AIcon icon="i-bx-home" />
+        <ADatePicker />
       </div>
     </ACard>
   </div>

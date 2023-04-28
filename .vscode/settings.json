@@ -80,6 +80,8 @@
       "isItalic": false,
     },
   ],
+
+  "vite.autoStart": false,
   // Extention: Code Spell Checker
   "cSpell.words": [
     "composables",

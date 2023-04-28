@@ -70,6 +70,7 @@ export default defineConfig({
             { text: 'Checkbox', link: '/guide/components/checkbox' },
             { text: 'Chip', link: '/guide/components/chip' },
             { text: 'Dialog', link: '/guide/components/dialog' },
+            { text: 'Date', link: '/guide/components/date' },
             { text: 'Drawer', link: '/guide/components/drawer' },
             { text: 'Input', link: '/guide/components/input' },
             { text: 'List', link: '/guide/components/list' },
