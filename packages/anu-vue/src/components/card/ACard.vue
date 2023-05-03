@@ -35,10 +35,17 @@ else if (Array.isArray(_textProp.value.classes))
   _textProp.value.classes = [..._textProp.value.classes, 'text-sm']
 else
   _textProp.value.classes = ' text-sm'
+
+const cardRef = ref<HTMLElement | null>(null)
+
+defineExpose({
+  cardRef,
+})
 </script>
 
 <template>
   <div
+    ref="cardRef"
     class="a-card relative overflow-hidden bg-[hsla(var(--a-surface-c),var(--un-bg-opacity,1))]"
     :class="classes"
     :style="styles"
