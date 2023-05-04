@@ -24,6 +24,9 @@ const dataPickerDefaultProps = {
   placement: {
     default: 'bottom',
   },
+  showTime: {
+    default: true,
+  },
 
   ...useLayerProps({
     color: {
@@ -45,6 +48,15 @@ export const datePickerProps = {
   /**
    * Middleware option from Floating UI
    */
+
+  modelValue: {
+    type: Date,
+  },
+
+  format: {
+    type: String,
+    default: 'DD MMMM YYYY HH:mm',
+  },
   middleware: {
     type: Function as PropType<MiddlewareFunc>,
     default: middlewareFunc,

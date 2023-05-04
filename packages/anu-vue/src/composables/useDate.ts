@@ -7,8 +7,6 @@ import utc from 'dayjs/plugin/utc'
 
 import type { Dayjs } from 'dayjs'
 
-// import type { Dayjs } from 'dayjs/plugin/toObject'
-
 dayjs.extend(localeData)
 dayjs.extend(updateLocale)
 dayjs.locale(ru)
@@ -22,10 +20,21 @@ interface Calendar {
   range: number[]
 }
 
-interface DisplayTime { hours: string; minutes: string }
+export type TKeyDisplayTime = 'hours' | 'minutes'
+type TDisplayTime = Record<TKeyDisplayTime, { value: string; max: number }>
 
-export function useDate(dateProps: Date | undefined) {
+// interface DisplayTime {
+
+//   // [key: string]: { value: string; max: number }
+//   hours: { value: string; max: number }
+//   minutes: { value: string; max: number }
+// }
+
+export function useDate(dateProps?: Date) {
   const date = ref(dayjs(dateProps).locale('ru'))
+
+  if (!dateProps)
+    date.value = date.value.startOf('hour')
 
   const currentDate = ref(dayjs())
 
@@ -46,18 +55,26 @@ export function useDate(dateProps: Date | undefined) {
     }
   })
 
-  const displayTime = ref<DisplayTime>({
-    hours: date.value.hour().toString(),
-    minutes: '00',
+  const displayTime = ref<TDisplayTime>({
+    hours: { value: date.value.hour().toString(), max: 24 },
+    minutes: { value: changeTime(date.value.minute(), 60), max: 60 },
   })
+
+  const weekDays = dayjs.weekdaysMin(true)
 
   return {
     date,
     calendar,
     displayTime,
+    weekDays,
 
     setMonth: setMonth(date),
     handleClick: handleClick(date, calendar),
+    setDisplayTime: setDisplayTime(displayTime, date),
+    isSelectDate: isSelectDate(calendar),
+    isCurrentDate: isCurrentDate(calendar, date, currentDate),
+    isInactiveDate: isInactiveDate(calendar),
+    isWeekend,
   }
 }
 
@@ -85,29 +102,54 @@ function changeTime(time: number, max: number) {
   return time < 10 ? `0${time}` : `${time}`
 }
 
-function setHours(displayTime: Ref<DisplayTime>) {
-  return function (v: number) {
-    const time = parseInt(displayTime.value.hours) + v
-    const display = changeTime(time, 24)
+function updateDate(displayTime: Ref<TDisplayTime>, date: Ref<Dayjs>) {
+  date.value = date.value.set('minute', parseInt(displayTime.value.minutes?.value || '0')).set('hours', parseInt(displayTime.value.hours?.value || '0'))
+}
+
+function setDisplayTime(displayTime: Ref<TDisplayTime>, date: Ref<Dayjs>) {
+  return function (v: number, id: TKeyDisplayTime, isButton = true) {
+    const obj = displayTime.value[id]
+
+    const time = isButton ? parseInt(obj.value) + v : v
+    const display = changeTime(time, obj.max)
+
+    obj.value = display
 
     displayTime.value = {
       ...displayTime.value,
-      hours: display,
+      [id]: { ...obj },
     }
+
+    updateDate(displayTime, date)
   }
 }
 
-function setMinutes(displayTime: Ref<DisplayTime>) {
-  return function (v: number) {
-    const time = parseInt(displayTime.value.minutes) + v
-    const display = changeTime(time, 60)
+// function setHours(displayTime: Ref<DisplayTime>, date: Ref<Dayjs>) {
+//   return function (v: number, isButton = true) {
+//     const time = isButton ? parseInt(displayTime.value.hours || '0') + v : v
+//     const display = changeTime(time, 24)
 
-    displayTime.value = {
-      ...displayTime.value,
-      minutes: display,
-    }
-  }
-}
+//     displayTime.value = {
+//       ...displayTime.value,
+//       hours: display,
+//     }
+//     date.value = date.value.set('minute', parseInt(displayTime.value.minutes)).set('hours', parseInt(displayTime.value.hours))
+//   }
+// }
+
+// function setMinutes(displayTime: Ref<DisplayTime>, date: Ref<Dayjs>) {
+//   return function (v: number, isButton = true) {
+//     const time = isButton ? parseInt(displayTime.value.hours || '0') + v : v
+//     const display = changeTime(time, 60)
+
+//     displayTime.value = {
+//       ...displayTime.value,
+//       minutes: display,
+//     }
+
+//     date.value = date.value.set('minute', parseInt(displayTime.value.minutes)).set('hours', parseInt(displayTime.value.hours))
+//   }
+// }
 
 function isSelectDate(calendar: ComputedRef<Calendar>) {
   return function (item: number, index: number) {

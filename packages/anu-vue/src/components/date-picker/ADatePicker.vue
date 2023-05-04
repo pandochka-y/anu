@@ -1,77 +1,24 @@
 <script lang="ts" setup>
-import dayjs from 'dayjs'
-import ru from 'dayjs/locale/ru'
-import localeData from 'dayjs/plugin/localeData'
-import toObject from 'dayjs/plugin/toObject'
-import updateLocale from 'dayjs/plugin/updateLocale'
-import utc from 'dayjs/plugin/utc'
-
+import type { Dayjs } from 'dayjs'
 import { datePickerProps } from './props'
 
-import { useLayer } from '@/composables'
+import type { dateOwnSlots } from './slots'
+import type { TKeyDisplayTime } from '@/composables'
+
+import { useDate, useLayer } from '@/composables'
 
 const props = defineProps(datePickerProps)
+
+const emits = defineEmits(['update:modelValue'])
 
 defineOptions({
   name: 'ADatePicker',
   inheritAttrs: false,
 })
 
-dayjs.extend(localeData)
-dayjs.extend(updateLocale)
-dayjs.locale(ru)
-dayjs.extend(utc)
-dayjs.extend(toObject)
-
-const date = ref(dayjs().locale('ru'))
-
-const currentDate = ref(dayjs())
-
-const calendar = computed(() => {
-  const startOfMonth = date.value.startOf('month')
-  const lastMonth = date.value.add(-1, 'month')
-  const startOfWeek = startOfMonth.subtract((startOfMonth.day() + 6) % 7, 'day')
-
-  const r = startOfWeek.date() === 1
-    ? range(startOfWeek.date(), startOfMonth.daysInMonth())
-    : range(startOfWeek.date(), lastMonth.daysInMonth()).concat(range(1, startOfMonth.daysInMonth()))
-
-  return {
-    date: date.value.toObject(),
-    start: (startOfMonth.day() + 6) % 7,
-    end: r.length,
-    range: r.concat(range(1, 42 - r.length)),
-  }
-})
-
-function range(start: number, end: number) {
-  return Array.from({ length: (end - start + 1) }, (v, k) => k + start)
-}
-
-function setMonth(v: number) {
-  date.value = date.value.add(v, 'month')
-}
-
-function handleClick(index: number, val: number) {
-  if (index < calendar.value.start)
-    date.value = date.value.subtract(1, 'month')
-
-  else if (index >= calendar.value.end)
-    date.value = date.value.add(1, 'month')
-
-  date.value = date.value.date(val)
-}
-
-const displayTime = ref<{ hours: string; minutes: string }>({
-  hours: date.value.hour().toString(),
-  minutes: '00',
-})
+const dateCompose = useDate(props.modelValue)
 
 const parentEl = ref<HTMLElement | null>(null)
-
-const calendarFloatingRef = ref<HTMLElement | null>(null)
-
-const weekDays = dayjs.weekdaysMin(true)
 
 const { getLayerClasses } = useLayer()
 
@@ -81,103 +28,74 @@ const { styles, classes } = getLayerClasses(
   toRef(props, 'states'),
 )
 
-function changeTime(time: number, max: number) {
-  if (time < 0 || time >= max)
-    time = (time + max) % max
+defineSlots<typeof dateOwnSlots>()
 
-  return time < 10 ? `0${time}` : `${time}`
+const [showCalendar, toggleShowCalendar] = useToggle(true)
+
+function resetInput(input: HTMLInputElement, id: TKeyDisplayTime) {
+  const resetValue = dateCompose.displayTime.value[id].value
+  input.value = resetValue || '00'
 }
 
-function setHours(v: number) {
-  const time = parseInt(displayTime.value.hours) + v
-  const display = changeTime(time, 24)
+function validateInput(event: Event) {
+  const target = event.target as HTMLInputElement
+  const id = target.id as TKeyDisplayTime
+  const newValue = parseInt(target.value)
 
-  displayTime.value = {
-    ...displayTime.value,
-    hours: display,
-  }
+  if (isNaN(newValue) || newValue > dateCompose.displayTime.value[id].max)
+    resetInput(target, id)
+  else
+    dateCompose.setDisplayTime(newValue, id, false)
 }
 
-function setMinutes(v: number) {
-  const time = parseInt(displayTime.value.minutes) + v
-  const display = changeTime(time, 60)
-
-  displayTime.value = {
-    ...displayTime.value,
-    minutes: display,
-  }
-}
-
-function isSelectDate(item: number, index: number) {
-  return (item === calendar.value.date.date)
-            && (index >= calendar.value.start) && (index < calendar.value.end)
-}
-
-function isCurrentDate(item: number, index: number) {
-  if (index < calendar.value.start || index >= calendar.value.end)
-    return false
-
-  return currentDate.value.month() === date.value.month() && currentDate.value.date() === item
-}
-
-function isWeekend(index: number) {
-  return index % 7 > 4
-}
-
-function isInactiveDate(index: number) {
-  return index >= calendar.value.end || index < calendar.value.start
-}
-
-defineSlots()
+watch(() => dateCompose.date.value, (d: Dayjs) => {
+  emits('update:modelValue', d.toDate())
+}, { immediate: true },
+)
 </script>
 
 <template>
-  <div
-    ref="parentEl"
-    class="calendar"
-  >
-    <slot
-      v-bind="{ input: date.format('DD.MM.YYYY HH:mm') }"
-      :slot-props="date.format('DD.MM.YYYY HH:mm')"
-    />
+  <div ref="parentEl">
+    <div @click="toggleShowCalendar()">
+      <slot v-bind="{ formattedDate: dateCompose.date.value.format(props.format) }" />
+    </div>
 
     <AFloating
       v-bind="{ ...props }"
+      v-model="showCalendar"
       :reference-el="parentEl"
     >
       <div
-        ref="calendarFloatingRef"
         class="calendar"
-        :style="styles"
         :class="[classes]"
       >
         <ACard
-          class="px-4 py-4 w-80 "
+          class="em:px-4 em:py-4 em:w-80 "
           variant="outline"
           color="primary"
         >
-          <div class="flex flex-row justify-between mb-4 ">
+          <div class="flex flex-row justify-between em:mb-4 ">
             <ABtn
               icon-only
               icon="i-carbon:chevron-left"
-              class="text-3"
+              class="em:text-3"
               variant="text"
-              @click="setMonth(-1)"
+              @click="dateCompose.setMonth(-1)"
             />
             <div class="dark:color-gray-100 color-gray-600 capitalize flex items-center">
-              {{ date.format('MMMM') }} {{ date.format('YYYY') }}
+              {{ dateCompose.date.value.format('MMMM') }} {{ dateCompose.date.value.format('YYYY') }}
             </div>
             <ABtn
               icon-only
               icon="i-carbon:chevron-right"
-              class="text-3"
+              class="em:text-3"
               variant="text"
-              @click="setMonth(1)"
+              @click="dateCompose.setMonth(1)"
             />
           </div>
-          <div class="grid grid-cols-7 mb-4 border-b dark:border-gray-700 border-gray-300 pb-2">
+          <div class="grid grid-cols-7 em:mb-4 border-b dark:border-gray-700 border-gray-300 em:pb-2">
             <div
-              v-for="day in weekDays"
+              v-for="day in dateCompose.weekDays"
               :key="day"
               class="dark:color-gray-100  color-gray-500 capitalize flex items-center justify-center"
             >
@@ -187,65 +105,85 @@ defineSlots()
             </div>
           </div>
           <div
-            :key="date.month()"
+            :key="dateCompose.date.value.month()"
             class="grid grid-cols-7"
           >
             <div
-              v-for="item, index in calendar.range"
-              :key="`${item}-${date.month()}-${index}`"
+              v-for="item, index in dateCompose.calendar.value.range"
+              :key="`${item}-${dateCompose.date.value.month()}-${index}`"
               class="flex items-center justify-center dark:color-gray-100 color-gray-600 "
               :class="[
-                (isInactiveDate(index) || isWeekend(index)) && 'disable-day']"
+                (dateCompose.isInactiveDate(index) || dateCompose.isWeekend(index)) && 'disable-day']"
             >
               <div
-                class="rd-50 flex items-center cursor-pointer justify-center h-8 w-8 "
+                class="rd-50 flex items-center cursor-pointer justify-center em:h-8 em:w-8 "
                 :class="[
-                  isSelectDate(item, index) && 'select-date',
-                  isCurrentDate(item, index) && 'current-date',
+                  dateCompose.isSelectDate(item, index) && 'select-date',
+                  dateCompose.isCurrentDate(item, index) && 'current-date',
                 ]"
-                @click="() => handleClick(index, item)"
+                @click="() => dateCompose.handleClick(index, item)"
               >
                 {{ item }}
               </div>
             </div>
           </div>
-          <div class="time-container flex justify-center mt-4 items-center">
+          <div
+            v-if="props.showTime"
+            class="time-container flex justify-center em:mt-4 items-center"
+          >
             <div class="flex flex-col">
               <ABtn
                 icon-only
                 icon="i-carbon:chevron-up"
-                class="text-3"
+                class="em:text-3"
                 variant="text"
-                @click="setHours(+1)"
+                @click="dateCompose.setDisplayTime(+1, 'hours')"
               />
               <ABtn
                 icon-only
                 icon="i-carbon:chevron-down"
-                class="text-3"
+                class="em:text-3"
                 variant="text"
-                @click="setHours(-1)"
+                @click="dateCompose.setDisplayTime(-1, 'hours')"
               />
             </div>
-            <div class="mx-4 text-7 dark:color-gray-100 color-gray-600">
-              {{ displayTime.hours }}:{{ displayTime.minutes }}
+
+            <div class="em:mx-4 em:text-7 dark:color-gray-100 color-gray-600 items-center flex ">
+              <input
+                id="hours"
+                class="em:w-10 text-center"
+                type="number"
+                :value="dateCompose.displayTime.value.hours.value"
+                @change="(e) => validateInput(e)"
+              >
+              :
+              <input
+                id="minutes"
+                class="em:w-10 text-center"
+                type="number"
+                :value="dateCompose.displayTime.value.minutes.value"
+                @change="(e) => validateInput(e)"
+              >
             </div>
             <div class="flex flex-col">
               <ABtn
                 icon-only
                 icon="i-carbon:chevron-up"
-                class="text-3"
+                class="em:text-3"
                 variant="text"
-                @click="setMinutes(+5)"
+                @click="dateCompose.setDisplayTime(+5, 'minutes')"
               />
               <ABtn
                 icon-only
                 icon="i-carbon:chevron-down"
-                class="text-3"
+                class="em:text-3"
                 variant="text"
-                @click="setMinutes(-5)"
+                @click="dateCompose.setDisplayTime(-5, 'minutes')"
               />
             </div>
           </div>
+
+          {{ dateCompose.displayTime.value.hours }}:{{ dateCompose.displayTime.value.minutes }}
         </ACard>
       </div>
     </AFloating>
@@ -253,9 +191,6 @@ defineSlots()
 </template>
 
 <style lang="postcss">
-/* .calendar {
-  /* @apply h-100vh */
-/* } */
 .calendar .select-date {
     @apply dark:bg-gray-600 bg-gray-100
 }

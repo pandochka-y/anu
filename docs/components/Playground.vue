@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { useToggle } from '@vueuse/core'
 import { ref } from 'vue'
 
 const colors = [
@@ -10,9 +9,7 @@ const colors = [
   'danger',
 ]
 
-const inputRef = ref<string>('')
-
-const [showCalendar, toggleShowCalendar] = useToggle(true)
+const inputRef = ref<Date>(new Date())
 </script>
 
 <template>
@@ -30,25 +27,23 @@ const [showCalendar, toggleShowCalendar] = useToggle(true)
         >
           {{ color }}
         </ABtn> -->
-        <AIcon icon="i-bx-home" />
-        <AInput />
 
         <div>
-          qe
-          <ATooltip text="123" />
-        </div>
-        {{ inputRef }}
-        <div @click="toggleShowCalendar()">
-          container
-          <ADatePicker
-            v-model="showCalendar"
-            class="testest"
-          >
-            <template #default="{ input }">
-              {{ input }}
-              <AInput :model-value="input" />
-            </template>
-          </ADatePicker>
+          {{ inputRef }}
+          <div>
+            container
+            <ADatePicker
+              v-model="inputRef"
+              class="testest"
+            >
+              <template #default="{ formattedDate }">
+                <AInput
+                  :model-value="formattedDate"
+                  :readonly="true"
+                />
+              </template>
+            </ADatePicker>
+          </div>
         </div>
       </div>
     </ACard>

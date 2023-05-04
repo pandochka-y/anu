@@ -30,7 +30,6 @@ const elementId = _elementIdToken ? `a-input-${_elementIdToken}-${Math.random().
 const refRoot = ref()
 const refInputContainer = ref()
 const refInputWrapper = ref()
-console.log('element', elementId)
 
 defineExpose({
   refRoot,
