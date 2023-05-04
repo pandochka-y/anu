@@ -33,10 +33,10 @@ const dataPickerDefaultProps = {
       default: 'primary',
     },
     variant: {
-      default: 'outline',
+      default: 'fill',
     },
     states: {
-      default: false,
+      default: true,
     },
   }),
 }

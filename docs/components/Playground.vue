@@ -35,6 +35,7 @@ const inputRef = ref<Date>(new Date())
             <ADatePicker
               v-model="inputRef"
               class="testest"
+              color="danger"
             >
               <template #default="{ formattedDate }">
                 <AInput

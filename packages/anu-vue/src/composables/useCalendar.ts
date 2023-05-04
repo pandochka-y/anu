@@ -30,7 +30,7 @@ type TDisplayTime = Record<TKeyDisplayTime, { value: string; max: number }>
 //   minutes: { value: string; max: number }
 // }
 
-export function useDate(dateProps?: Date) {
+export function useCalendar(dateProps?: Date) {
   const date = ref(dayjs(dateProps).locale('ru'))
 
   if (!dateProps)
